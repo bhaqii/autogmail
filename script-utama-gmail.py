@@ -119,6 +119,22 @@ class ResourceManager:
 # Initialize global resource manager
 resource_manager = ResourceManager()
 
+
+def force_close_browser():
+    """Force close browser and related processes"""
+    global driver
+    try:
+        if resource_manager.is_driver_alive():
+            print("🛑 Forcing Selenium driver to quit...")
+            driver.quit()
+    except Exception as e:
+        print(f"⚠️ Force close warning: {e}")
+    try:
+        subprocess.run(["pkill", "-f", "gologin"], check=False)
+    except Exception as e:
+        print(f"⚠️ Process kill warning: {e}")
+
+
 class SuperOptimizedTiming:
     """SUPER OPTIMIZED timing patterns - 20% faster while maintaining natural behavior"""
     
@@ -165,41 +181,41 @@ class UnifiedTiming:
     
     @staticmethod
     def micro_pause():
-        """Micro pause yang konsisten dengan variasi natural (lebih sempit)"""
-        return random.uniform(0.08, 0.18)  # 80-180ms
+        """Micro pause yang konsisten dengan variasi natural (lebih cepat)"""
+        return random.uniform(0.06, 0.15)
     
     @staticmethod
     def quick_read(text_length):
         """Reading time yang adaptive berdasarkan kompleksitas teks (lebih cepat)"""
         words = max(text_length / 5, 1)
-        base_time = min(words * 0.04, 0.3)  # Max 300ms
-        cognitive_load = random.uniform(-0.02, 0.08)
+        base_time = min(words * 0.035, 0.25)
+        cognitive_load = random.uniform(-0.015, 0.06)
         return base_time + cognitive_load
     
     @staticmethod
     def swift_decision(complexity="medium"):
         """Decision time dengan natural variations (lebih cepat)"""
         timing_map = {
-            "simple": (0.1, 0.3),
-            "medium": (0.2, 0.5),
-            "complex": (0.3, 0.7)
+            "simple": (0.08, 0.25),
+            "medium": (0.18, 0.45),
+            "complex": (0.28, 0.65)
         }
         return random.uniform(*timing_map[complexity])
     
     @staticmethod
     def typing_speed():
         """Natural typing speed dengan human-like variations (lebih cepat)"""
-        return random.uniform(0.03, 0.12)  # 30-120ms per character
+        return random.uniform(0.025, 0.10)
     
     @staticmethod
     def minimal_exploration():
         """Page exploration time dengan realistic patterns (lebih singkat)"""
-        return random.uniform(0.2, 0.5)
+        return random.uniform(0.15, 0.4)
     
     @staticmethod
     def fast_typing_speed():
         """Fast typing speed untuk random keys"""
-        return random.uniform(0.02, 0.06)  # 20-60ms per character (lebih cepat)
+        return random.uniform(0.015, 0.05)
 
 def browser_monitor():
     """ENHANCED MONITORING: Browser close detection + Auto-completion detection"""
@@ -328,6 +344,61 @@ def get_user_data():
         "day": day, "month": month, "year": year,
         "gender": gender, "password": DEFAULT_PASSWORD
     }
+
+
+def generate_user_data(first_name, last_name, gender_choice="1"):
+    """Generate user data tanpa input manual (untuk bulk mode)"""
+    day = str(random.randint(1, 28))
+    year = str(random.randint(1985, 2005))
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    month = random.choice(months)
+    gender_map = {"1": "Male", "2": "Female", "3": "Rather not say", "4": "Custom"}
+    gender = gender_map.get(str(gender_choice).strip(), "Male")
+    return {
+        "first_name": first_name.strip(),
+        "last_name": last_name.strip(),
+        "day": day,
+        "month": month,
+        "year": year,
+        "gender": gender,
+        "password": DEFAULT_PASSWORD,
+    }
+
+
+def load_bulk_profiles(path="datagmail.txt"):
+    """Load user profiles dari file teks"""
+    profiles = []
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                if '@' in line and ',' not in line:
+                    continue  # Skip existing email entries
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) >= 2:
+                    first_name, last_name = parts[0], parts[1]
+                    gender_choice = parts[2] if len(parts) > 2 else "1"
+                    profiles.append(generate_user_data(first_name, last_name, gender_choice))
+                else:
+                    print(f"⚠️ Invalid line in bulk data: {line}")
+    else:
+        print(f"❌ Bulk data file '{path}' not found")
+    return profiles
+
+
+def save_generated_email(email, file_path="datagmail.txt"):
+    """Append generated email ke file output"""
+    try:
+        with open(file_path, "a") as f:
+            f.write(email + "\n")
+        print(f"💾 Saved email to {file_path}")
+    except Exception as e:
+        print(f"⚠️ Could not save email: {e}")
 
 def advanced_natural_typing(element, text, typing_style="adaptive"):
     """Advanced natural typing dengan multiple patterns"""
@@ -1589,110 +1660,105 @@ def enhanced_stage2_birth_gender(driver, data):
 
 # ============= MAIN EXECUTION WITH EXTENDED STAGES =============
 
-def main():
-    """EXTENDED MAIN: All 6 stages + Auto completion detection"""
+def run_automation(user_data):
+    """Run automation untuk satu user"""
     global gl, profile_id, driver, cleanup_completed, browser_monitor_active
-    
+
     gl = None
     profile_id = None
     driver = None
     cleanup_completed = False
     browser_monitor_active = False
+    resource_manager.cleaned = False
 
     subprocess.run(["warp-cli", "connect"])
-    
-    # Validate GoLogin token
-    if not GOLOGIN_TOKEN:
-        print("❌ GOLOGIN_TOKEN is not set!")
-        print("🔧 Please set your GoLogin API token in the script")
-        return
-    
-    user_data = get_user_data()
+    time.sleep(5)
+
     start_time = time.time()
-    
+
     try:
         print("\n🚀 EXTENDED GMAIL AUTOMATION")
-        
-        # Step 1: Initialize GoLogin dan LANGSUNG buka halaman signup
+
+        # Step 1: Initialize GoLogin dan buka halaman signup
         print(f"\n{'='*60}")
         print("🎭 STEP 1: DIRECT GOLOGIN + SIGNUP INITIALIZATION")
         print("="*60)
         print("🔧 Initializing GoLogin...")
-        
+
         gl = GoLogin({
             "token": GOLOGIN_TOKEN,
         })
-        
+
         print("📝 Creating profile...")
         profile = gl.createProfileRandomFingerprint({"os": "win"})
         profile_id = profile.get('id')
         print(f"✅ Profile: {profile_id}")
-        
+
         gl.setProfileId(profile_id)
-        
+
         print("🚀 Starting browser...")
         debugger_address = gl.start()
         print(f"✅ Browser started")
-        
+
         # Register resources
         resource_manager.set_gologin(gl, profile_id)
-        
-        # Step 2: Connect Selenium dan LANGSUNG navigate
+
+        # Step 2: Connect Selenium dan navigate
         print(f"\n{'='*60}")
         print("🔗 STEP 2: DIRECT SELENIUM CONNECTION + NAVIGATION")
         print("="*60)
         print("⚙️ Connecting Selenium...")
-        
+
         chrome_options = Options()
         chrome_options.add_experimental_option("debuggerAddress", debugger_address)
         driver = webdriver.Chrome(options=chrome_options)
         resource_manager.set_driver(driver)
-        
+
         print("🌐 NAVIGATING DIRECTLY TO SIGNUP PAGE...")
         driver.get("https://accounts.google.com/signup")
-        
+
         # Wait for page load
         WebDriverWait(driver, 10).until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
-        
+
         print("✅ Gmail signup page loaded!")
-        
+
         # Step 3: Start enhanced browser monitoring with completion detection
         print("🔍 Starting enhanced browser monitoring with auto-completion detection...")
         start_browser_monitor()
-        
+
         # Step 4: Execute ALL extended automation stages
         print(f"\n{'='*60}")
         print("🎯 STEP 3: EXTENDED AUTOMATION EXECUTION (6 STAGES)")
         print("="*60)
-        
+
         stages_results = {}
-        
+
         # Stage 1: Name Entry
         stages_results["stage1"] = enhanced_stage1_name(driver, user_data)
         time.sleep(UnifiedTiming.swift_decision("medium"))
-        
+
         # Stage 2: Birth & Gender
         stages_results["stage2"] = enhanced_stage2_birth_gender(driver, user_data)
         time.sleep(UnifiedTiming.swift_decision("medium"))
-        
+
         # Stage 3: Username Detection & Manual Input
         print(f"\n{'='*60}")
         print("🎯 STEP 4: USERNAME & PASSWORD & RECOVERY & EXTENDED STAGES")
         print("="*60)
-        
+
         # Wait sampai detect username stage
         username_detected = False
         max_wait = 45
         wait_start = time.time()
-        
+
         while time.time() - wait_start < max_wait:
             if detect_username_stage(driver):
                 username_detected = True
                 break
-            time.sleep(1.2)
-        
+            time.sleep(1.0)
+
         if username_detected:
             # Wait for manual username input
             if wait_for_manual_username_input(driver):
@@ -1707,60 +1773,60 @@ def main():
                 stages_results["stage3"] = enhanced_stage3_password(driver, user_data)
             else:
                 stages_results["stage3"] = False
-        
+
         # Stage 4: Recovery/Verification Handling
         time.sleep(SuperOptimizedTiming.swift_decision("medium"))
-        
+
         recovery_detected = False
         max_wait_recovery = 20
         wait_start_recovery = time.time()
-        
+
         while time.time() - wait_start_recovery < max_wait_recovery:
             if detect_recovery_stage(driver):
                 recovery_detected = True
                 break
-            time.sleep(0.6)
-        
+            time.sleep(0.5)
+
         if recovery_detected:
             stages_results["stage4"] = enhanced_stage4_recovery(driver, user_data)
         else:
             print("⚠️ Recovery stage not detected - continuing to next stages...")
             stages_results["stage4"] = True  # Mark as success to continue
-        
+
         # ============= NEW EXTENDED STAGES =============
-        
+
         # Stage 5: Email Extraction
         time.sleep(UnifiedTiming.swift_decision("medium"))
-        
+
         email_detected = False
         max_wait_email = 15
         wait_start_email = time.time()
-        
+
         while time.time() - wait_start_email < max_wait_email:
             if detect_email_extraction_stage(driver):
                 email_detected = True
                 break
-            time.sleep(0.8)
-        
+            time.sleep(0.6)
+
         if email_detected:
             stages_results["stage5"] = enhanced_stage5_email_extraction(driver, user_data)
         else:
             print("⚠️ Email extraction stage not detected - continuing...")
             stages_results["stage5"] = True  # Mark as success to continue
-        
+
         # Stage 6: Terms Agreement
         time.sleep(UnifiedTiming.swift_decision("medium"))
-        
+
         terms_detected = False
         max_wait_terms = 15
         wait_start_terms = time.time()
-        
+
         while time.time() - wait_start_terms < max_wait_terms:
             if detect_terms_agreement_stage(driver):
                 terms_detected = True
                 break
-            time.sleep(0.8)
-        
+            time.sleep(0.6)
+
         if terms_detected:
             stages_results["stage6"] = enhanced_stage6_terms_agreement(driver, user_data)
         else:
@@ -1770,7 +1836,7 @@ def main():
         # Results
         execution_time = time.time() - start_time
         success_count = sum(1 for result in stages_results.values() if result)
-        
+
         print(f"\n{'='*80}")
         print("🎉 EXTENDED AUTOMATION COMPLETED")
         print("="*80)
@@ -1779,20 +1845,14 @@ def main():
         print(f"🔒 Password: {user_data['password']}")
         if "generated_email" in user_data:
             print(f"📧 Generated Email: {user_data['generated_email']}")
+            save_generated_email(user_data["generated_email"])
         print(f"⏱️ Time: {execution_time:.2f} seconds")
         print(f"📊 Stages: {success_count}/{len(stages_results)} completed")
         print(f"🎭 Profile: {profile_id}")
-        print("🖱️ Complete any remaining steps manually (if any)")
-        print("🔍 Monitoring active - will auto-cleanup when completion detected")
-        print("✨ Waiting for completion URL: myaccount.google.com")
-        print("❌ Or close this script manually when done")
-        
-        # Keep browser open with monitoring (will auto-cleanup on completion)
-        try:
-            input("\nPress Enter to cleanup and exit (or wait for auto-completion)...")
-        except KeyboardInterrupt:
-            print("\n🛑 Interrupted by user")
-    
+
+        print("🛑 Closing browser...")
+        force_close_browser()
+
     except KeyboardInterrupt:
         print("\n⏹️ Automation interrupted")
     except Exception as e:
@@ -1801,14 +1861,37 @@ def main():
     finally:
         # Cleanup
         stop_browser_monitor()
-        
+
+        force_close_browser()
+
         if not cleanup_completed:
             resource_manager.safe_cleanup()
             cleanup_completed = True
 
-if __name__ == "__main__":
+
+def main():
+    """Menu awal untuk memilih mode input"""
     if not GOLOGIN_TOKEN:
         print("⚠️ Please set your GoLogin API token in GOLOGIN_TOKEN variable")
-        sys.exit(1)
-    
+        return
+
+    print("=== INPUT MODE ===")
+    print("1. Input data manual")
+    print("2. Input dari file datagmail.txt")
+    choice = input("Pilih mode (1/2): ").strip()
+
+    profiles = []
+    if choice == "1":
+        profiles = [get_user_data()]
+    elif choice == "2":
+        profiles = load_bulk_profiles("datagmail.txt")
+    else:
+        print("❌ Invalid choice")
+        return
+
+    for profile in profiles:
+        run_automation(profile)
+
+
+if __name__ == "__main__":
     main()
